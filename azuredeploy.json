@@ -232,7 +232,7 @@
       }
     },
     "currentComputeNodeImage": "[variables('computeNodeImages')[parameters('computeNodeImage')]]",
-    "artifactsBaseUrl": ""
+    "artifactsBaseUrl": "https://raw.githubusercontent.com/wagesworld/AzureHPC/master"
   },
   "resources": [
     {
