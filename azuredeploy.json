@@ -215,6 +215,7 @@
   },
   "variables": {
     "virtualNetworkName": "[concat(parameters('clusterName'), 'VNet')]",
+	"virtualNetworkSubnetName": "Subnet-1",
     "storageAccountNamePrefix": "[toLower(concat('hpc', uniqueString(resourceGroup().id, toLower(parameters('clusterName')))))]",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat(parameters('clusterName'), '-PublicIP-HN')]",
@@ -252,11 +253,17 @@
           "virtualNetworkName": {
             "value": "[variables('virtualNetworkName')]"
           },
+		  "virtualNetworkSubnetName": {
+            "value": "[variables('virtualNetworkSubnetName')]"
+          },
 		  "addressPrefix": {
             "value": "[parameters('addressPrefix')]"
           },
 		  "subnet1Prefix": {
             "value": "[parameters('subnet1Prefix')]"
+          },
+		  "vnetNewOrExisting": {
+            "value": "[variables('')]"
           },
 		  "headNodeIP": {
             "value": "[parameters('headNodeIP')]"

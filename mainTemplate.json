@@ -8,12 +8,29 @@
         "description": "The HPC Pack cluster name, also used as the host name of the head node. It must contain between 3 and 15 characters with lowercase letters and numbers, and must start with a letter."
       }
     },
+	"vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "description": "Indicates whether the vnet is new or existing"
+      }
+    },
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
-        "description": "Name of the virtual network to be created. It must contain between 2 and 63 characters, start with a letter, end with a letter or number, and may contain only letters, numbers, underscores, periods, or hyphens."
+        "description": "Name of the virtual network to use or create. It must contain between 2 and 63 characters, start with a letter, end with a letter or number, and may contain only letters, numbers, underscores, periods, or hyphens."
       }
     },
+	"virtualNetworkSubnetName" {
+		"type": "string",
+		"metadata": {
+			"description": "Name of the existing virtual network subnet to use or to create."
+		}
+	},
 	"addressPrefix": {
       "type": "string",
       "metadata": {
@@ -199,7 +216,7 @@
     "storageAccountIndexWidth": "[length(string(sub(add(variables('cnStorageAccountNumber'), variables('cnStorageAccountStartIndex')), 1)))]",
     "hnStorageAccountName": "[concat(parameters('storageAccountNamePrefix'), padLeft(string(parameters('storageAccountStartIndex')), variables('storageAccountIndexWidth'), '0'))]",
     "hnStorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts',variables('hnStorageAccountName'))]",
-    "subnet1Name": "Subnet-1",
+    "subnet1Name": "[parameters('virtualNetworkSubnetName')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "publicIPAddressType": "Dynamic",
@@ -411,7 +428,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('artifactsBaseUrl'),'/vnet-with-dns-server.json')]",
+		  "uri": "[concat(parameters('artifactsBaseUrl'), '/vnet-with-dns-server-', parameters('vnetNewOrExisting'), '.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {

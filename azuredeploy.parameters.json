@@ -8,6 +8,15 @@
     "privateDomainName": {
       "value": "hpc.local"
     },
+	"virtualNetworkNewOrExisting": {
+		"value": "New"
+	},
+	"virtualNetworkName": {
+		"value": "HPCVnet"
+	},
+	"virtualNetworkSubnetName": {
+		"value": "Subnet-1"
+	},
 	"addressPrefix": {
       "value": "10.0.0.0/16"
     },
