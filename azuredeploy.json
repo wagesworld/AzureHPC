@@ -17,6 +17,29 @@
         "description": "The fully qualified domain name (FQDN) for the private domain forest which will be created by this template, for example 'hpc.local'."
       }
     },
+	"virtualNetworkNewOrExisting": {
+		"type": "string",
+		"defaultValue": "New",
+		"allowedValues": [
+			"New",
+			"Existing"
+		],
+		"metadata": {
+			"description": "If this is an existing VNet then you do not need to fill out the Address Prefix or Subnet Prefix."
+		}
+	},
+	"virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the vnet or use or create."
+      }
+    },
+	"virtualNetworkSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the subnet to use or create."
+      }
+    },
 	"addressPrefix": {
       "type": "string",
       "metadata": {
@@ -214,8 +237,6 @@
     }
   },
   "variables": {
-    "virtualNetworkName": "[concat(parameters('clusterName'), 'VNet')]",
-	"virtualNetworkSubnetName": "Subnet-1",
     "storageAccountNamePrefix": "[toLower(concat('hpc', uniqueString(resourceGroup().id, toLower(parameters('clusterName')))))]",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat(parameters('clusterName'), '-PublicIP-HN')]",
@@ -250,11 +271,14 @@
           "clusterName": {
             "value": "[parameters('clusterName')]"
           },
+		  "virtualNetworkNewOrExisting": {
+			"value": "[parameters('virtualNetworkNewOrExisting')]"
+		  },
           "virtualNetworkName": {
-            "value": "[variables('virtualNetworkName')]"
+            "value": "[parameters('virtualNetworkName')]"
           },
 		  "virtualNetworkSubnetName": {
-            "value": "[variables('virtualNetworkSubnetName')]"
+            "value": "[parameters('virtualNetworkSubnetName')]"
           },
 		  "addressPrefix": {
             "value": "[parameters('addressPrefix')]"
