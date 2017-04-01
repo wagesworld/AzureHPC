@@ -28,6 +28,13 @@
 			"description": "If this is an existing VNet then you do not need to fill out the Address Prefix or Subnet Prefix."
 		}
 	},
+	"virtualNetworkResourceGroup": {
+		"type": "string",
+		"defaultValue": "",
+		"metadata": {
+			"description": "If an existing vnet is specified, then use this field to specify the resource group the vnet is provisioned in."
+		}
+	},
 	"virtualNetworkName": {
       "type": "string",
       "metadata": {
@@ -42,12 +49,14 @@
     },
 	"addressPrefix": {
       "type": "string",
+	  "defaultValue": "",
       "metadata": {
         "description": "Address space of the virtual network."
       }
     },
 	"subnet1Prefix": {
       "type": "string",
+	  "defaultValue": "",
       "metadata": {
         "description": "Address space of the subnet."
       }
@@ -274,6 +283,12 @@
 		  "virtualNetworkNewOrExisting": {
 			"value": "[parameters('virtualNetworkNewOrExisting')]"
 		  },
+		  "virtualNetworkResourceGroup": {
+			"value": "[parameters('virtualNetworkResourceGroup')]"
+		  },
+		  "vnetNewOrExisting": {
+            "value": "[parameters('virtualNetworkNewOrExisting')]"
+          },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
           },
@@ -285,9 +300,6 @@
           },
 		  "subnet1Prefix": {
             "value": "[parameters('subnet1Prefix')]"
-          },
-		  "vnetNewOrExisting": {
-            "value": "[variables('')]"
           },
 		  "headNodeIP": {
             "value": "[parameters('headNodeIP')]"

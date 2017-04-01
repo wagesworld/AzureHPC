@@ -19,6 +19,13 @@
         "description": "Indicates whether the vnet is new or existing"
       }
     },
+	"virtualNetworkResourceGroup": {
+		"type": "string",
+		"defaultValue": "",
+		"metadata": {
+			"description": "If an existing vnet is specified, this is the resource group the vnet is provisioned in."
+		}
+	},
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
@@ -217,7 +224,7 @@
     "hnStorageAccountName": "[concat(parameters('storageAccountNamePrefix'), padLeft(string(parameters('storageAccountStartIndex')), variables('storageAccountIndexWidth'), '0'))]",
     "hnStorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts',variables('hnStorageAccountName'))]",
     "subnet1Name": "[parameters('virtualNetworkSubnetName')]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "vnetID": "[resourceId(parameters('virtualNetworkResourceGroup'),'Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "publicIPAddressType": "Dynamic",
     "availabilitySetNamePrefix": "[concat(parameters('clusterName'), '-avset')]",
@@ -269,25 +276,39 @@
         "accountType": "[parameters('storageAccountType')]"
       }
     },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/virtualNetworks",
+	{
+      "apiVersion": "2015-01-01",
+      "type": "Microsoft.Resources/deployments",
       "name": "[parameters('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('addressPrefix')]"
-          ]
+        "mode": "Incremental",
+        "templateLink": {
+		  "uri": "[concat(parameters('artifactsBaseUrl'), '/vnet-with-dns-server-', parameters('vnetNewOrExisting'), '.json')]",
+          "contentVersion": "1.0.0.0"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnet1Name')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]"
-            }
+        "parameters": {
+          "apiVersion": {
+            "value": "[variables('apiVersion')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[parameters('addressPrefix')]"
+          },
+          "subnetName": {
+            "value": "[variables('subnet1Name')]"
+          },
+          "subnetRange": {
+            "value": "[parameters('subnet1Prefix')]"
+          },
+          "DNSServerAddress": {
+            "value": [
+              "[parameters('headNodeIP')]",
+              "8.8.8.8"
+            ]
           }
-        ]
+        }
       }
     },
     {
@@ -419,50 +440,12 @@
       }
     },
     {
-      "apiVersion": "2015-01-01",
-      "type": "Microsoft.Resources/deployments",
-      "name": "updateVNetDNS",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/createHeadNode"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-		  "uri": "[concat(parameters('artifactsBaseUrl'), '/vnet-with-dns-server-', parameters('vnetNewOrExisting'), '.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "apiVersion": {
-            "value": "[variables('apiVersion')]"
-          },
-          "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
-          },
-          "virtualNetworkAddressRange": {
-            "value": "[parameters('addressPrefix')]"
-          },
-          "subnetName": {
-            "value": "[variables('subnet1Name')]"
-          },
-          "subnetRange": {
-            "value": "[parameters('subnet1Prefix')]"
-          },
-          "DNSServerAddress": {
-            "value": [
-              "[parameters('headNodeIP')]",
-              "8.8.8.8"
-            ]
-          }
-        }
-      }
-    },
-    {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'),'/configureHeadNode')]",
       "apiVersion": "[variables('apiVersion')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "Microsoft.Resources/deployments/updateVNetDNS"
+        "[concat('Microsoft.Resources/deployments/',parameters('virtualNetworkName'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -502,7 +485,7 @@
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex()), 3, '0'))]",
       "dependsOn": [
         "Microsoft.Resources/deployments/createAvailabilitySets",
-        "Microsoft.Resources/deployments/updateVNetDNS",
+        "[concat('Microsoft.Resources/deployments/',parameters('virtualNetworkName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountNamePrefix'), padLeft(string(add(div(copyIndex(), parameters('nbrCNPerStorageAccount')), variables('cnStorageAccountStartIndex'))), variables('storageAccountIndexWidth'), '0'))]"
       ],
       "copy": {
