@@ -286,9 +286,6 @@
 		  "virtualNetworkResourceGroup": {
 			"value": "[parameters('virtualNetworkResourceGroup')]"
 		  },
-		  "vnetNewOrExisting": {
-            "value": "[parameters('virtualNetworkNewOrExisting')]"
-          },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
           },
